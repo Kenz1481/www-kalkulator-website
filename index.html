@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Floating particles background */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-20px) translateX(20px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+        
+        .calculator-container {
+            max-width: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            animation: fadeIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            animation: slideIn 0.8s 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b, #ffd166);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 15px rgba(255, 126, 95, 0.3);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        header p {
+            font-size: 1.15rem;
+            color: #e2e2e2;
+            max-width: 600px;
+            line-height: 1.7;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+        
+        .calculator {
+            background: rgba(19, 26, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6),
+                        0 0 0 1px rgba(255, 255, 255, 0.05),
+                        inset 0 0 30px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            width: 100%;
+            max-width: 420px;
+            transform: scale(0.8);
+            animation: popIn 0.8s 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes popIn {
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        .calculator::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            transform: rotate(30deg);
+            z-index: -1;
+        }
+        
+        .calculator:hover {
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+        }
+        
+        .display {
+            background: rgba(13, 18, 30, 0.9);
+            border-radius: 18px;
+            padding: 25px 20px;
+            margin-bottom: 25px;
+            text-align: right;
+            box-shadow: inset 0 6px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .display::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            box-shadow: 0 0 15px rgba(255, 126, 95, 0.5);
+        }
+        
+        .previous-operand {
+            font-size: 1.2rem;
+            color: #aaa;
+            min-height: 1.6rem;
+            margin-bottom: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        
+        .current-operand {
+            font-size: 2.8rem;
+            font-weight: 500;
+            min-height: 3.5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            letter-spacing: -1px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+        
+        .button {
+            background: rgba(30, 35, 50, 0.7);
+            border: none;
+            border-radius: 18px;
+            color: #fff;
+            font-size: 1.5rem;
+            padding: 20px 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            font-weight: 500;
+            transform: translateY(0);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .button:hover {
+            background: rgba(40, 45, 65, 0.9);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(100%);
+            transition: transform 0.2s ease;
+        }
+        
+        .button:hover::after {
+            transform: translateY(0);
+        }
+        
+        .operator {
+            background: rgba(255, 126, 95, 0.25);
+            color: #ff9b85;
+        }
+        
+        .operator:hover {
+            background: rgba(255, 126, 95, 0.35);
+        }
+        
+        .equals {
+            background: linear-gradient(to bottom right, #ff7e5f, #feb47b);
+            color: #fff;
+            grid-column: span 2;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .equals:hover {
+            background: linear-gradient(to bottom right, #ff6b4a, #fea366);
+        }
+        
+        .function {
+            background: rgba(80, 100, 150, 0.25);
+            color: #a0b8ff;
+        }
+        
+        .function:hover {
+            background: rgba(80, 100, 150, 0.35);
+        }
+        
+        .zero {
+            grid-column: span 2;
+        }
+        
+        .history-panel {
+            background: rgba(19, 26, 42, 0.9);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            width: 100%;
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 1s 1s forwards;
+            opacity: 0;
+            transform: translateY(30px);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .history-panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #feb47b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .history-panel h2 i {
+            color: #ff7e5f;
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .history-item {
+            background: rgba(30, 35, 50, 0.6);
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item:hover {
+            background: rgba(40, 45, 65, 0.8);
+            transform: translateX(5px);
+        }
+        
+        .history-expression {
+            color: #ccc;
+            font-size: 1rem;
+        }
+        
+        .history-result {
+            color: #feb47b;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .clear-history {
+            background: rgba(255, 126, 95, 0.2);
+            color: #ff9b85;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin-left: auto;
+        }
+        
+        .clear-history:hover {
+            background: rgba(255, 126, 95, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+            font-size: 0.95rem;
+            animation: fadeIn 1s 1.2s forwards;
+            opacity: 0;
+        }
+        
+        .footer a {
+            color: #ff7e5f;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+        
+        .footer a:hover {
+            color: #feb47b;
+            text-decoration: underline;
+        }
+        
+        .active {
+            transform: scale(0.95);
+            background: rgba(50, 55, 75, 0.9) !important;
+        }
+        
+        /* Popup Welcome */
+        .welcome-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        
+        .welcome-popup.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .popup-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-popup.active .popup-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .popup-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+        }
+        
+        .popup-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .popup-content p {
+            font-size: 1.1rem;
+            color: #e2e2e2;
+            margin-bottom: 30px;
+            line-height: 1.7;
+        }
+        
+        .start-btn {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 126, 95, 0.6);
+        }
+        
+        .start-btn:active {
+            transform: translateY(1px);
+        }
+        
+        /* Animasi untuk angka */
+        @keyframes numberPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .number-pop {
+            animation: numberPop 0.2s ease;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .calculator {
+                max-width: 380px;
+                padding: 25px;
+            }
+            
+            .button {
+                padding: 18px 8px;
+                font-size: 1.4rem;
+            }
+            
+            .current-operand {
+                font-size: 2.4rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            header p {
+                font-size: 1rem;
+            }
+            
+            .calculator {
+                max-width: 340px;
+                padding: 20px;
+            }
+            
+            .button {
+                padding: 16px 6px;
+                font-size: 1.3rem;
+            }
+            
+            .current-operand {
+                font-size: 2.2rem;
+            }
+            
+            .history-panel {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <!-- Popup Welcome -->
+    <div class="welcome-popup active" id="welcomePopup">
+        <div class="popup-content">
+            <h2>Selamat Datang!</h2>
+            <p>Kalkulator Modern dengan UI interaktif dan animasi halus. Siap membantu perhitungan Anda dengan gaya yang elegan dan fungsionalitas yang lengkap.</p>
+            <p>Gunakan keyboard atau klik tombol untuk mulai menghitung!</p>
+            <button class="start-btn" id="startBtn">Mulai Menggunakan</button>
+        </div>
+    </div>
+    
+    <div class="calculator-container">
+        <header>
+            <h1><i class="fas fa-calculator"></i> Kalkulator</h1>
+            <p>Kalkulator elegan dengan animasi halus dan desain kontemporer. Sempurna untuk perhitungan sehari-hari dengan pengalaman pengguna yang luar biasa.</p>
+        </header>
+        
+        <div class="calculator">
+            <div class="display">
+                <div class="previous-operand" id="previous-operand"></div>
+                <div class="current-operand" id="current-operand">0</div>
+            </div>
+            
+            <div class="buttons-grid">
+                <button class="button function" data-action="clear">AC</button>
+                <button class="button function" data-action="delete"><i class="fas fa-backspace"></i></button>
+                <button class="button function" data-action="percentage">%</button>
+                <button class="button operator" data-operation="÷">÷</button>
+                
+                <button class="button" data-number="7">7</button>
+                <button class="button" data-number="8">8</button>
+                <button class="button" data-number="9">9</button>
+                <button class="button operator" data-operation="×">×</button>
+                
+                <button class="button" data-number="4">4</button>
+                <button class="button" data-number="5">5</button>
+                <button class="button" data-number="6">6</button>
+                <button class="button operator" data-operation="-">−</button>
+                
+                <button class="button" data-number="1">1</button>
+                <button class="button" data-number="2">2</button>
+                <button class="button" data-number="3">3</button>
+                <button class="button operator" data-operation="+">+</button>
+                
+                <button class="button zero" data-number="0">0</button>
+                <button class="button" data-number=".">.</button>
+                <button class="button equals" data-action="calculate">=</button>
+            </div>
+        </div>
+        
+        <div class="history-panel">
+            <h2><i class="fas fa-history"></i> Riwayat Perhitungan</h2>
+            <div class="history-list" id="history-list">
+                <!-- History items will be added here -->
+            </div>
+            <button class="clear-history" id="clear-history">Bersihkan Riwayat</button>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025. Kalkulator All Right Reserved</p>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size and position
+                const size = Math.random() * 30 + 10;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const delay = Math.random() * 15;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.opacity = Math.random() * 0.4 + 0.1;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Play sound function
+        function playSound() {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 523.25; // C5 note
+            gainNode.gain.value = 0.1;
+            
+            oscillator.start();
+            
+            setTimeout(() => {
+                oscillator.stop();
+            }, 50);
+        }
+        
+        // Calculator class with fixed functionality
+        class Calculator {
+            constructor(previousOperandElement, currentOperandElement) {
+                this.previousOperandElement = previousOperandElement;
+                this.currentOperandElement = currentOperandElement;
+                this.historyList = document.getElementById('history-list');
+                this.clear();
+                this.history = [];
+            }
+            
+            clear() {
+                this.currentOperand = '0';
+                this.previousOperand = '';
+                this.operation = undefined;
+                this.justCalculated = false;
+            }
+            
+            delete() {
+                this.currentOperand = this.currentOperand.toString().slice(0, -1);
+                if (this.currentOperand === '' || this.currentOperand === '-') {
+                    this.currentOperand = '0';
+                }
+            }
+            
+            appendNumber(number) {
+                if (number === '.' && this.currentOperand.includes('.')) return;
+                
+                if (this.justCalculated) {
+                    this.currentOperand = '0';
+                    this.justCalculated = false;
+                }
+                
+                if (this.currentOperand === '0' && number !== '.') {
+                    this.currentOperand = number.toString();
+                } else {
+                    this.currentOperand = this.currentOperand.toString() + number.toString();
+                }
+            }
+            
+            chooseOperation(operation) {
+                if (this.currentOperand === '') return;
+                
+                if (this.justCalculated) {
+                    this.previousOperand = this.currentOperand;
+                    this.currentOperand = '';
+                    this.justCalculated = false;
+                }
+                
+                if (this.previousOperand !== '') {
+                    this.calculate();
+                }
+                
+                this.operation = operation;
+                this.previousOperand = this.currentOperand;
+                this.currentOperand = '';
+            }
+            
+            calculate() {
+                let computation;
+                const prev = parseFloat(this.previousOperand);
+                const current = parseFloat(this.currentOperand);
+                if (isNaN(prev) || isNaN(current)) return;
+                
+                let operationSymbol = '';
+                switch (this.operation) {
+                    case '+':
+                        computation = prev + current;
+                        operationSymbol = '+';
+                        break;
+                    case '−':
+                        computation = prev - current;
+                        operationSymbol = '-';
+                        break;
+                    case '×':
+                        computation = prev * current;
+                        operationSymbol = '×';
+                        break;
+                    case '÷':
+                        if (current === 0) {
+                            computation = 'Error';
+                        } else {
+                            computation = prev / current;
+                        }
+                        operationSymbol = '÷';
+                        break;
+                    default:
+                        return;
+                }
+                
+                // Format hasil agar tidak terlalu panjang
+                if (computation === 'Error') {
+                    this.currentOperand = computation;
+                } else {
+                    this.currentOperand = computation.toString().length > 10 ? 
+                        computation.toExponential(5) : computation.toString();
+                }
+                
+                // Save to history
+                if (computation !== 'Error') {
+                    const historyItem = {
+                        expression: `${prev} ${operationSymbol} ${current}`,
+                        result: this.currentOperand
+                    };
+                    this.history.unshift(historyItem);
+                    this.updateHistory();
+                }
+                
+                this.operation = undefined;
+                this.previousOperand = '';
+                this.justCalculated = true;
+            }
+            
+            applyPercentage() {
+                if (this.currentOperand === '0') return;
+                const current = parseFloat(this.currentOperand);
+                this.currentOperand = (current / 100).toString();
+            }
+            
+            getDisplayNumber(number) {
+                if (number === '') return '';
+                if (number === 'Error') return 'Error';
+                
+                const stringNumber = number.toString();
+                const integerDigits = parseFloat(stringNumber.split('.')[0]);
+                const decimalDigits = stringNumber.split('.')[1];
+                
+                let integerDisplay;
+                if (isNaN(integerDigits)) {
+                    integerDisplay = '';
+                } else {
+                    integerDisplay = integerDigits.toLocaleString('id', {
+                        maximumFractionDigits: 0
+                    });
+                }
+                
+                if (decimalDigits != null) {
+                    return `${integerDisplay}.${decimalDigits}`;
+                } else {
+                    return integerDisplay;
+                }
+            }
+            
+            updateDisplay() {
+                this.currentOperandElement.innerText = this.getDisplayNumber(this.currentOperand);
+                
+                if (this.operation != null) {
+                    this.previousOperandElement.innerText = 
+                        `${this.getDisplayNumber(this.previousOperand)} ${this.operation}`;
+                } else {
+                    this.previousOperandElement.innerText = '';
+                }
+            }
+            
+            updateHistory() {
+                this.historyList.innerHTML = '';
+                
+                // Keep only the last 10 history items
+                if (this.history.length > 10) {
+                    this.history = this.history.slice(0, 10);
+                }
+                
+                this.history.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.classList.add('history-item');
+                    historyItem.innerHTML = `
+                        <div class="history-expression">${item.expression}</div>
+                        <div class="history-result">= ${this.getDisplayNumber(item.result)}</div>
+                    `;
+                    this.historyList.appendChild(historyItem);
+                });
+            }
+            
+            clearHistory() {
+                this.history = [];
+                this.updateHistory();
+            }
+        }
+        
+        // Initialize after page loads
+        window.onload = function() {
+            createParticles();
+            
+            // DOM Elements
+            const numberButtons = document.querySelectorAll('[data-number]');
+            const operationButtons = document.querySelectorAll('[data-operation]');
+            const equalsButton = document.querySelector('[data-action="calculate"]');
+            const deleteButton = document.querySelector('[data-action="delete"]');
+            const allClearButton = document.querySelector('[data-action="clear"]');
+            const percentageButton = document.querySelector('[data-action="percentage"]');
+            const previousOperandElement = document.getElementById('previous-operand');
+            const currentOperandElement = document.getElementById('current-operand');
+            const welcomePopup = document.getElementById('welcomePopup');
+            const startBtn = document.getElementById('startBtn');
+            const clearHistoryBtn = document.getElementById('clear-history');
+            
+            // Initialize calculator
+            const calculator = new Calculator(previousOperandElement, currentOperandElement);
+            
+            // Close welcome popup
+            startBtn.addEventListener('click', () => {
+                welcomePopup.classList.remove('active');
+            });
+            
+            // Auto close popup after 5 seconds
+            setTimeout(() => {
+                welcomePopup.classList.remove('active');
+            }, 5000);
+            
+            // Event Listeners
+            numberButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    playSound();
+                    calculator.appendNumber(button.innerText);
+                    calculator.updateDisplay();
+                    
+                    // Add animation effect
+                    button.classList.add('active');
+                    setTimeout(() => {
+                        button.classList.remove('active');
+                    }, 150);
+                    
+                    // Add pop animation to the display
+                    currentOperandElement.classList.add('number-pop');
+                    setTimeout(() => {
+                        currentOperandElement.classList.remove('number-pop');
+                    }, 200);
+                });
+            });
+            
+            operationButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    playSound();
+                    calculator.chooseOperation(button.innerText);
+                    calculator.updateDisplay();
+                    
+                    // Add animation effect
+                    button.classList.add('active');
+                    setTimeout(() => {
+                        button.classList.remove('active');
+                    }, 150);
+                });
+            });
+            
+            equalsButton.addEventListener('click', () => {
+                playSound();
+                calculator.calculate();
+                calculator.updateDisplay();
+                
+                // Add animation effect
+                equalsButton.classList.add('active');
+                setTimeout(() => {
+                    equalsButton.classList.remove('active');
+                }, 150);
+                
+                // Add pop animation to the display
+                currentOperandElement.classList.add('number-pop');
+                setTimeout(() => {
+                    currentOperandElement.classList.remove('number-pop');
+                }, 200);
+            });
+            
+            allClearButton.addEventListener('click', () => {
+                playSound();
+                calculator.clear();
+                calculator.updateDisplay();
+                
+                // Add animation effect
+                allClearButton.classList.add('active');
+                setTimeout(() => {
+                    allClearButton.classList.remove('active');
+                }, 150);
+            });
+            
+            deleteButton.addEventListener('click', () => {
+                playSound();
+                calculator.delete();
+                calculator.updateDisplay();
+                
+                // Add animation effect
+                deleteButton.classList.add('active');
+                setTimeout(() => {
+                    deleteButton.classList.remove('active');
+                }, 150);
+            });
+            
+            percentageButton.addEventListener('click', () => {
+                playSound();
+                calculator.applyPercentage();
+                calculator.updateDisplay();
+                
+                // Add animation effect
+                percentageButton.classList.add('active');
+                setTimeout(() => {
+                    percentageButton.classList.remove('active');
+                }, 150);
+            });
+            
+            clearHistoryBtn.addEventListener('click', () => {
+                playSound();
+                calculator.clearHistory();
+            });
+            
+            // Keyboard support
+            document.addEventListener('keydown', event => {
+                if (event.key >= 0 && event.key <= 9) {
+                    playSound();
+                    calculator.appendNumber(event.key);
+                    calculator.updateDisplay();
+                    
+                    // Add pop animation to the display
+                    currentOperandElement.classList.add('number-pop');
+                    setTimeout(() => {
+                        currentOperandElement.classList.remove('number-pop');
+                    }, 200);
+                }
+                if (event.key === '.') {
+                    playSound();
+                    calculator.appendNumber(event.key);
+                    calculator.updateDisplay();
+                }
+                if (event.key === '+' || event.key === '-' || event.key === '*' || event.key === '/') {
+                    playSound();
+                    const operationMap = {
+                        '+': '+',
+                        '-': '−',
+                        '*': '×',
+                        '/': '÷'
+                    };
+                    calculator.chooseOperation(operationMap[event.key]);
+                    calculator.updateDisplay();
+                }
+                if (event.key === 'Enter' || event.key === '=') {
+                    playSound();
+                    calculator.calculate();
+                    calculator.updateDisplay();
+                    
+                    // Add pop animation to the display
+                    currentOperandElement.classList.add('number-pop');
+                    setTimeout(() => {
+                        currentOperandElement.classList.remove('number-pop');
+                    }, 200);
+                }
+                if (event.key === 'Escape') {
+                    playSound();
+                    calculator.clear();
+                    calculator.updateDisplay();
+                }
+                if (event.key === 'Backspace') {
+                    playSound();
+                    calculator.delete();
+                    calculator.updateDisplay();
+                }
+                if (event.key === '%') {
+                    playSound();
+                    calculator.applyPercentage();
+                    calculator.updateDisplay();
+                }
+            });
+        };
+    </script>
+</body>
+</html>
